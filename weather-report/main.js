@@ -1,5 +1,4 @@
-const coords = {};
-const result = {};
+let coords = {};
 const temp_unit = ' \u00B0C';
 
 const localStorage = window.localStorage;
@@ -33,44 +32,48 @@ const loadWeather = () => {
   requestAPI(constructAPIURL(coords));
 };
 
-const constructAPIURL = (coords) => {
+constructAPIURL = (coords) => {
   const apiURL = 'https://fcc-weather-api.glitch.me/api/current?';
   return apiURL + 'lat=' + coords.lat + '&lon=' + coords.lon;
 };
 
-const requestAPI = (apiURL) => {
+requestAPI = (apiURL) => {
   console.log(apiURL);
-  $.ajax({
-    url: apiURL,
-    success: (result) => {
+
+  fetch(apiURL)
+    .then((res) => res.json())
+    .then((result) => {
       localStorage.setItem('temperature', JSON.stringify(result));
-      populateData();
-    },
-    error: (err) => {
+      populateData(result);
+    })
+    .catch((err) => {
       console.error('Some error occured \n' + err);
-    },
-  });
+    });
 };
 
-const populateData = () => {
-  const result = localStorage.getItem('temperature');
-  if (result === null) {
+populateData = (result) => {
+  if (!result) {
     return;
   }
-  result = JSON.parse(result);
-
   console.log(result);
 
   // populate the data
-  $('#city').text(result['name']);
-  $('#temp').text(Math.round(result['main']['temp']) + temp_unit);
-  $('#temp_max').text(result['main']['temp_max'] + temp_unit);
-  $('#temp_min').text(result['main']['temp_min'] + temp_unit);
-  $('#humidity').text(result['main']['humidity']);
-  $('#pressure').text(result['main']['pressure']);
+  document.getElementById('city').innerHTML = result['name'];
 
-  $('#temp_img').html('<img src="' + result['weather'][0]['icon'] + '"/>');
-  $('#temp_cond').html(result['weather'][0]['main']);
+  document.getElementById('temp').innerHTML =
+    Math.round(result['main']['temp']) + temp_unit;
+
+  document.getElementById('temp_max').innerHTML =
+    result['main']['temp_max'] + temp_unit;
+  document.getElementById('temp_min').innerHTML =
+    result['main']['temp_min'] + temp_unit;
+  document.getElementById('humidity').innerHTML = result['main']['humidity'];
+  document.getElementById('pressure').innerHTML = result['main']['pressure'];
+
+  /*   document.getElementById('temp_img').innerHTML =
+    '<img src="' + result['weather'][0]['icon'] + '"/>'; */
+
+  document.getElementById('temp_cond').innerHTML = result['weather'][0]['main'];
 };
 
 window.onload = () => {
